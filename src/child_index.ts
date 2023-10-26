@@ -8,6 +8,8 @@ process.on('message', (message: string) => {
         const script = new Script(message);
         script.runInThisContext();
     }
+
+	// console.log(message);
 });
 
 const app = express();

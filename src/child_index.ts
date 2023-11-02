@@ -1,16 +1,33 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { Script } from "vm"
+import { Script, createContext } from "vm"
+// import fs from 'fs';
+import child_process from 'child_process';
+
 
 
 process.on('message', (message: string) => {
-    for (let i = 0; i < 1000; i++) {
-        const script = new Script(message);
-        script.runInThisContext();
-    }
+	try {
+		const context = {
+			require: require,
+			console: console
+		};
 
-	// console.log(message);
+		const script = new Script(message);
+		const newContext = createContext(context);
+		const start = new Date();
+		script.runInContext(newContext);
+		const end = new Date();
+		console.log('T:', (end.valueOf() - start.valueOf()));
+	} catch (error) {
+		console.log(error);
+	}
 });
+
+
+console.log(`Child: DB_HOST is set to: ${process.env.DB_HOST}`);
+console.log(`Child: DB_USER is set to: ${process.env.DB_USER}`);
+
 
 const app = express();
 const server = require('http').Server(app);
@@ -42,5 +59,3 @@ server.listen(port, (err: any) => {
 });
 
 module.exports = server;
-
-
